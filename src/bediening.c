@@ -1,6 +1,6 @@
 
 
-#include "control.h"
+#include "bediening.h"
 
 void control_key_stub(control_kdata_t *kdata) {}
 

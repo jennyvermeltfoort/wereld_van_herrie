@@ -1,10 +1,10 @@
-#include "window.h"
+#include "scherm.h"
 
 #include <stdint.h>
 #include <stdio.h>
 
-#include "control.h"
-#include "player.h"
+#include "bediening.h"
+#include "speler.h"
 
 BITMAPINFO frame_bitmap_info;
 HBITMAP frame_bitmap = 0;

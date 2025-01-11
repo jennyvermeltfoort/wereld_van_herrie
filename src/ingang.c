@@ -1,6 +1,6 @@
-#include "player.h"
-#include "types.h"
-#include "window.h"
+#include "speler.h"
+#include "typen.h"
+#include "scherm.h"
 
 int WINAPI WinMain(HINSTANCE h_instance,
                    HINSTANCE h_previous_instance, LPSTR lp_cmd_line,

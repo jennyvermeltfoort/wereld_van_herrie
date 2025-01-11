@@ -1,6 +1,6 @@
-#include "player.h"
+#include "speler.h"
 
-#include "control.h"
+#include "bediening.h"
 
 entity_position_t player_position = {};
 
