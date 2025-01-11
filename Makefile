@@ -1,28 +1,25 @@
 
-SOURCES = $(wildcard src/*.c)
-HEADERS = $(wildcard include/*.h)
+BRONNEN = $(wildcard bron/*.c)
+KOPPELINGEN = $(wildcard bron/*.h)
 
-TARGET = game.exe
-TARGET_DEBUG = game_debug.exe
+DOELWIT = spel.exe
+DOELWIT_DEBUG = spel_debug.exe
 
-CC = gcc
-CFLAGS = --std=c23 -I./include/
-LIBS = -lgdi32
+COMPILER = gcc
+CFLAG = --std=c23 
+BIEBS = -lgdi32
 
-${TARGET}: ${HEADERS} ${SOURCES}
-	${CC} ${CFLAGS} -o ${TARGET} $^ ${LIBS}
+${DOELWIT}: ${KOPPELINGEN} ${BRONNEN}
+	${COMPILER} ${CFLAG} -o ${DOELWIT} $^ ${BIEBS}
 
-${TARGET_DEBUG}: ${HEADERS} ${SOURCES}
-	${CC} ${CFLAGS} -g -o ${TARGET} $^ ${LIBS}
+${DOELWIT_DEBUG}: ${KOPPELINGEN} ${BRONNEN}
+	${COMPILER} ${CFLAG} -g -o ${DOELWIT_DEBUG} $^ ${BIEBS}
 
-debug: ${TARGET_DEBUG}
+debug: ${DOELWIT_DEBUG}
 
-run: ${TARGET}
-	./${TARGET}
-
-all: ${TARGET}
+all: ${DOELWIT}
 
 clean:
-	rm -f ${TARGET} {TARGET_DEBUG}
+	rm -f ${DOELWIT} ${DOELWIT_DEBUG}
 
 

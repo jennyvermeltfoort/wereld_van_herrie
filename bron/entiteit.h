@@ -1,6 +1,7 @@
 #ifndef __WACHTER_ENTITEIT_H
 #define __WACHTER_ENTITEIT_H
 
+#include <stdint.h>
 
 typedef struct {
     uint16_t x;
@@ -17,8 +18,8 @@ typedef enum {
 	entiteit_rang_l0, // teken eerst
 	entiteit_rang_l1,
 	entiteit_rang_l2,
-	entiteit_rang_null,
-} entiteit_rang_t;
+	entiteit_rang_nul,
+} entiteit_rang_e;
 
 
 #endif //  __WACHTER_ENTITEIT_H
