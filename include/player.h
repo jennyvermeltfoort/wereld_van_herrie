@@ -2,13 +2,12 @@
 #ifndef __GUARD_PLAYER_H
 #define __GUARD_PLAYER_H
 
-#include "types.h"
 #include <stdint.h>
 
-typedef struct {
-	uint32_t xpos;
-	uint32_t ypos;
-} player_position_t;
+#include "types.h"
+#include "entity.h"
 
+entity_position_t* player_get_position(void);
+void player_init(void);
 
-#endif // __GUARD_PLAYER_H
+#endif  // __GUARD_PLAYER_H

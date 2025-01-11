@@ -1,8 +1,9 @@
 #include "window.h"
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
+#include "control.h"
 #include "player.h"
 
 BITMAPINFO frame_bitmap_info;
@@ -14,8 +15,6 @@ typedef struct {
     uint32_t height;
     uint32_t *pixels;
 } window_framedata_t;
-
-player_position_t player_pos = {};
 
 window_framedata_t framedata = {};
 
@@ -61,24 +60,8 @@ LRESULT CALLBACK window_proc(HWND handle, UINT message, WPARAM wparam,
         } break;
 
         case WM_KEYDOWN: {
-            switch (wparam) {
-                case VK_LEFT: {
-                    player_pos.xpos -= 5;
-
-                } break;
-                case VK_RIGHT: {
-                    player_pos.xpos += 5;
-
-                } break;
-                case VK_UP: {
-                    player_pos.ypos += 5;
-
-                } break;
-                case VK_DOWN: {
-                    player_pos.ypos -= 5;
-
-                } break;
-            }
+            control_kdata_t kdata = {.lparam = lparam};
+            control_proc_key(wparam, &kdata);
         }; break;
 
         default: {
@@ -118,23 +101,27 @@ errno_e window_start(HINSTANCE h_instance,
         return errno_err;
     }
 
+    entity_position_t *player_position = player_get_position();
     ShowWindow(handle, n_cmd_show);
 
     MSG message = {};
     while (GetMessage(&message, NULL, 0, 0) > 0) {
         TranslateMessage(&message);
         DispatchMessage(&message);
-	for (uint32_t y = 0 ; y < framedata.height ; y++) {
-	for (uint32_t x = 0 ; x < framedata.width ; x++) {
-		framedata.pixels[y * framedata.width + x] = 0;
-	}
-	}
 
-	for (uint32_t i = 0 ; i < 10 ; i++) {
-	for (uint32_t y = 0 ; y < 5 ; y++) {
-		framedata.pixels[(i + player_pos.ypos) * framedata.width + player_pos.xpos + y] = 0xFFFFFF;
-	}
-	}
+        for (uint32_t y = 0; y < framedata.height; y++) {
+            for (uint32_t x = 0; x < framedata.width; x++) {
+                framedata.pixels[y * framedata.width + x] = 0;
+            }
+        }
+
+        for (uint32_t i = 0; i < 10; i++) {
+            for (uint32_t y = 0; y < 5; y++) {
+                framedata.pixels[(i + player_position->y) *
+                                     framedata.width +
+                                 player_position->x + y] = 0xFFFFFF;
+            }
+        }
 
         InvalidateRect(handle, NULL, false);
         UpdateWindow(handle);
