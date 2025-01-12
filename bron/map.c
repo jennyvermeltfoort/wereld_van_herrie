@@ -12,7 +12,7 @@
 #define CEL_MAAT_X 16
 #define CEL_MAAT_Y 16
 #define CEL_MAAT CEL_MAAT_X * CEL_MAAT_Y
-#define MAP_MAAT_X 17
+#define MAP_MAAT_X 32
 #define MAP_MAAT_Y 16
 #define MAP_MAAT MAP_MAAT_X * MAP_MAAT_Y
 
@@ -64,3 +64,7 @@ void map_vul_scherm(void) {
 	}
 }
 
+
+void map_entiteit_preferie(entiteit_t * entiteit) {
+
+}
