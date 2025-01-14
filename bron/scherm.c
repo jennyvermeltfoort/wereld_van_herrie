@@ -1,8 +1,11 @@
 
 #include "scherm.h"
+
+#include <stdbool.h>
+
 #include "bediening.h"
-#include "speler.h"
 #include "map.h"
+#include "speler.h"
 
 BITMAPINFO kader_bitkaart_info;
 HBITMAP kader_bitkaart = 0;
@@ -10,32 +13,20 @@ HDC kader_apparaat_context = 0;
 
 scherm_kaderdata_t kaderdata = {};
 
-LRESULT CALLBACK scherm_verwerk_bericht(HWND hendel, UINT bericht, WPARAM wparam,
-                             LPARAM lparam) {
+LRESULT CALLBACK scherm_verwerk_bericht(HWND hendel, UINT bericht,
+                                        WPARAM wparam,
+                                        LPARAM lparam) {
     switch (bericht) {
         case WM_PAINT: {
             PAINTSTRUCT paint;
             HDC device_context;
             device_context = BeginPaint(hendel, &paint);
-            // BitBlt(device_context, paint.rcPaint.left,
-            //        paint.rcPaint.top,
-            //        paint.rcPaint.right - paint.rcPaint.left,
-            //        paint.rcPaint.bottom - paint.rcPaint.top,
-            //        kader_apparaat_context, paint.rcPaint.left,
-            //        paint.rcPaint.top, SRCCOPY);
-	    StretchBlt(
-			    device_context,
-			    paint.rcPaint.left,
-			    paint.rcPaint.top,
-            	            paint.rcPaint.right - paint.rcPaint.left,
-                    	    paint.rcPaint.bottom - paint.rcPaint.top,
-			    kader_apparaat_context,
-			    0,
-			    255,
-			    256,
-			    272,
-			   SRCCOPY); 
-
+            BitBlt(device_context, paint.rcPaint.left,
+                   paint.rcPaint.top,
+                   paint.rcPaint.right - paint.rcPaint.left,
+                   paint.rcPaint.bottom - paint.rcPaint.top,
+                   kader_apparaat_context, paint.rcPaint.left,
+                   paint.rcPaint.top, SRCCOPY);
             EndPaint(hendel, &paint);
         } break;
 
@@ -77,8 +68,8 @@ LRESULT CALLBACK scherm_verwerk_bericht(HWND hendel, UINT bericht, WPARAM wparam
 }
 
 melding_e scherm_start(HINSTANCE instantie,
-                     HINSTANCE instantie_vorige, LPSTR lp_cmd_line,
-                     int n_cmd_show) {
+                       HINSTANCE instantie_vorige, LPSTR lp_cmd_line,
+                       int n_cmd_show) {
     const char naam_klas[] = "HerrieClass";
     WNDCLASS klas = {
         .lpfnWndProc = scherm_verwerk_bericht,
@@ -97,29 +88,31 @@ melding_e scherm_start(HINSTANCE instantie,
     kader_bitkaart_info.bmiHeader.biCompression = BI_RGB;
     kader_apparaat_context = CreateCompatibleDC(0);
 
-    HWND hendel =
-        CreateWindow(naam_klas, "Wereld van Herrie",
-                     WS_OVERLAPPEDWINDOW | WS_VISIBLE, 640, 300, 640,
-                     480, NULL, NULL, instantie, NULL);
+    HWND hendel = CreateWindow(naam_klas, "Wereld van Herrie",
+                               WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0,
+                               950, 950, NULL, NULL, instantie, NULL);
 
     if (hendel == NULL) {
         return melding_fout;
     }
 
-    map_prepareer(&kaderdata);
-    
+    map_t *map = map_alloceer();
+    map_laad(map, map0);
+
     ShowWindow(hendel, n_cmd_show);
 
     MSG bericht = {};
     while (GetMessage(&bericht, NULL, 0, 0) > 0) {
         TranslateMessage(&bericht);
         DispatchMessage(&bericht);
-	
-	map_vul_scherm();
+
+        map_vul_scherm(map, &kaderdata);
 
         InvalidateRect(hendel, NULL, false);
         UpdateWindow(hendel);
     }
+
+    map_vrijmaken(map);
 
     return melding_ok;
 }

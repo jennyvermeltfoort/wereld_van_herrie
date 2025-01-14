@@ -27,7 +27,9 @@ typedef enum : uint8_t {
     bediening_toets_s = 0x53,
 } bediening_toets_e;
 
-void bediening_registreer_toets(bediening_toets_e toets, bediening_toets_functie_t cb);
-void bediening_verwerk_toets(bediening_toets_e toets, bediening_data_t* data);
+void bediening_registreer_toets(bediening_toets_e toets,
+                                bediening_toets_functie_t cb);
+void bediening_verwerk_toets(bediening_toets_e toets,
+                             bediening_data_t* data);
 
 #endif  // __WACHTER_BEDIENING_H

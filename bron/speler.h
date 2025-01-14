@@ -4,8 +4,8 @@
 
 #include <stdint.h>
 
-#include "typen.h"
 #include "entiteit.h"
+#include "typen.h"
 
 entiteit_t* speler_neem_positie(void);
 void speler_prepareer(void);
