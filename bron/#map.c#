@@ -11,8 +11,8 @@
 // enitity is een cell. De wereld word per entity geprint naa rhet
 // scherm op volgorde van priority.
 
-#define CEL_MAAT_X 16
-#define CEL_MAAT_Y 16
+#define CEL_MAAT_X 32
+#define CEL_MAAT_Y 32
 #define CEL_MAAT CEL_MAAT_X *CEL_MAAT_Y
 
 typedef uint32_t cel_t[CEL_MAAT];
@@ -23,6 +23,11 @@ typedef enum : uint8_t {
     map_cel_eigenschap_poort = 2,
 } map_cel_eigenschap_e;
 
+typedef struct {
+    char terrein[32];
+    char eigenschappen[32];
+} map_data_locatie_t;
+
 cel_t terrein_pad = {[0 ...(CEL_MAAT - 1)] = 0XFFFF00};
 cel_t terrein_boom = {[0 ...(CEL_MAAT - 1)] = 0X008080};
 cel_t terrein_water = {[0 ...(CEL_MAAT - 1)] = 0X8080FF};
@@ -32,32 +37,65 @@ uint32_t *terrein_vertaler[] = {
     [2] = terrein_water,
 };
 
-char * map_data_locaties[] = {
-    [map_id_0] = "mappen/o/map0.data.o",
-    [map_id_1] = "mappen/o/map1.data.o",
-    [map_id_2] = "mappen/o/map2.data.o",
-    [map_id_3] = "mappen/o/map3.data.o",
-    [map_id_4] = "mappen/o/map4.data.o",
-    [map_id_5] = "mappen/o/map5.data.o",
-    [map_id_6] = "mappen/o/map6.data.o",
-    [map_id_7] = "mappen/o/map7.data.o",
+map_data_locatie_t map_data_locaties[] = {
+    [map0] =
+        {
+            .terrein = "./mappen/o/map0.terrein.o",
+            .eigenschappen = "./mappen/map0.eigenschappen",
+        },
+    [map1] =
+        {
+            .terrein = "mappen/map1.terrein",
+            .eigenschappen = "mappen/map1.eigenschappen",
+        },
+    [map2] =
+        {
+            .terrein = "mappen/map2.terrein",
+            .eigenschappen = "mappen/map2.eigenschappen",
+        },
+    [map3] =
+        {
+            .terrein = "mappen/map3.terrein",
+            .eigenschappen = "mappen/map3.eigenschappen",
+        },
+    [map4] =
+        {
+            .terrein = "mappen/map4.terrein",
+            .eigenschappen = "mappen/map4.eigenschappen",
+        },
+    [map5] =
+        {
+            .terrein = "mappen/map5.terrein",
+            .eigenschappen = "mappen/map5.eigenschappen",
+        },
 };
 
 map_t *map_alloceer(void) { return (map_t *)malloc(sizeof(map_t)); }
 
 void map_vrijmaken(map_t *map) { free(map); }
 
-melding_e map_laad(map_t *map, map_id_e map_nr) {
-    FILE *bestand = fopen(map_data_locaties[map_nr], "r");
-    if (bestand == NULL) {
+melding_e map_laad(map_t *map, map_e map_nr){
+    uint8_t buffer[MAP_MAAT] = {};
+    FILE *terrein = fopen(map_data_locaties[map_nr].terrein, "r");
+    if (terrein == NULL) {
         return melding_fout;
     }
-	map_bestand_t map_bestand = {};
-	fread(&map_bestand, 1, sizeof(map_bestand_t), bestand); 
-    fclose(bestand);
+
+    uint32_t gelezen = fread(buffer, sizeof(buffer[0]),
+                             MAP_MAAT * sizeof(buffer[0]), terrein);
+    if (gelezen != MAP_MAAT * sizeof(buffer[0])) {
+        printf(
+            "Fout bij het laden van map%u.terrein, aantal bytes "
+            "gelezen: %u.\n",
+            map_nr, gelezen);
+        printf("eof: %i, ferror: %i\n", feof(terrein),
+               ferror(terrein));
+        return melding_fout;
+    }
+    fclose(terrein);
 
     for (uint32_t i = 0; i < MAP_MAAT; i++) {
-        map->terrein[i] = terrein_vertaler[map_bestand.terrein[i]];
+        map->terrein[i] = terrein_vertaler[buffer[i]];
     }
 
     return melding_ok;
@@ -97,3 +135,4 @@ void map_vul_scherm(map_t *map, scherm_kaderdata_t *kaderdata) {
         }
     }
 }
+

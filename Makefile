@@ -1,9 +1,10 @@
 
 BRONNEN = $(wildcard bron/*.c)
-KOPPELINGEN = $(wildcard bron/*.h)
+KOPPELINGEN = $(wildcard bron/*.h bron/map/*.h)
 OBJECTEN = ${BRONNEN:.c=.o}
 
-BRON_MAP_COMPILER = mappen/compiler.c
+BRONNEN_MAP_COMPILER = $(wildcard bron/map/*.c)
+OBJECTEN_MAP_COMPILER = ${BRONNEN_MAP_COMPILER:.c=.o}
 
 DOELWIT = spel.exe
 DOELWIT_DEBUG = spel_debug.exe
@@ -16,19 +17,22 @@ BIEBS = -lgdi32
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}
 
-%.o: %.c ${KOPPELINGEN}
+%.o: %.c 
 	${COMPILER} ${CFLAG} -c $< -o $@
+
+${DOELWIT_MAP_COMPILER}: ${OBJECTEN_MAP_COMPILER}
+	${COMPILER} ${CFLAG} -o $@ $^
 
 debug: ${DOELWIT_DEBUG}
 
-${DOELWIT_MAP_COMPILER}: ${BRON_MAP_COMPILER}
-	${COMPILER} ${CFLAG} -o $@ $<
+map: ${DOELWIT_MAP_COMPILER}
 
-all: ${DOELWIT} ${DOELWIT_MAP_COMPILER}
+all: ${DOELWIT} 
 
 clean:
 	rm -f ${DOELWIT} ${DOELWIT_DEBUG}
 	rm -f ${OBJECTEN}
 	rm -f ${DOELWIT_MAP_COMPILER}
+	rm -f ${OBJECTEN_MAP_COMPILER}
 
 

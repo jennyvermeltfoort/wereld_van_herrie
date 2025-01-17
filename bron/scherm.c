@@ -97,7 +97,7 @@ melding_e scherm_start(HINSTANCE instantie,
     }
 
     map_t *map = map_alloceer();
-    map_laad(map, map0);
+    map_laad(map, map_id_0);
 
     ShowWindow(hendel, n_cmd_show);
 
