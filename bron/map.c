@@ -23,16 +23,16 @@ typedef enum : uint8_t {
     map_cel_eigenschap_poort = 2,
 } map_cel_eigenschap_e;
 
-cel_t terrein_pad = {[0 ...(CEL_MAAT - 1)] = 0XFFFF00};
-cel_t terrein_boom = {[0 ...(CEL_MAAT - 1)] = 0X008080};
-cel_t terrein_water = {[0 ...(CEL_MAAT - 1)] = 0X8080FF};
+cel_t map_terrein_pad = {[0 ...(CEL_MAAT - 1)] = 0XFFFF00};
+cel_t map_terrein_boom = {[0 ...(CEL_MAAT - 1)] = 0X008080};
+cel_t map_terrein_water = {[0 ...(CEL_MAAT - 1)] = 0X8080FF};
 uint32_t *terrein_vertaler[] = {
-    [0] = terrein_pad,
-    [1] = terrein_boom,
-    [2] = terrein_water,
+    [0] = map_terrein_pad,
+    [1] = map_terrein_boom,
+    [2] = map_terrein_water,
 };
 
-char * map_data_locaties[] = {
+char *map_data_locaties[] = {
     [map_id_0] = "mappen/o/map0.data.o",
     [map_id_1] = "mappen/o/map1.data.o",
     [map_id_2] = "mappen/o/map2.data.o",
@@ -43,17 +43,37 @@ char * map_data_locaties[] = {
     [map_id_7] = "mappen/o/map7.data.o",
 };
 
-map_t *map_alloceer(void) { return (map_t *)malloc(sizeof(map_t)); }
+#define MAP_OPSLAG_MAX 16
+map_t *map_opslag[map_opslag_max] = {};
+uint8_t map_opslag_index = 0;
 
-void map_vrijmaken(map_t *map) { free(map); }
+map_opslag_e map_alloceer(void) {
+    if (map_storage_index >= map_opslag_max) {
+        free(map_storage[0]);
+        map_storage_index = 0;
+    }
 
-melding_e map_laad(map_t *map, map_id_e map_nr) {
+    map_opslag[map_opslag_index++] = malloc(sizeof(map_t));
+    return map_opslag_index;
+}
+
+void map_vrijmaken(map_opslag_e index) {
+    free(map_opslag[index]);
+    map_opslag[index] == NULL;
+    while ((index + 1) < map_opslag_max && map_opslag[++index] != NULL) {
+        map_opslag[index - 1] = map_opslag[index];
+    }
+}
+
+melding_e map_laad(map_opslag_e index, map_id_e map_nr) {
+	map_t * map = map_opslag[index];
+    map_bestand_t map_bestand = {};
+
     FILE *bestand = fopen(map_data_locaties[map_nr], "r");
     if (bestand == NULL) {
         return melding_fout;
     }
-	map_bestand_t map_bestand = {};
-	fread(&map_bestand, 1, sizeof(map_bestand_t), bestand); 
+    fread(&map_bestand, 1, sizeof(map_bestand_t), bestand);
     fclose(bestand);
 
     for (uint32_t i = 0; i < MAP_MAAT; i++) {
@@ -63,7 +83,8 @@ melding_e map_laad(map_t *map, map_id_e map_nr) {
     return melding_ok;
 }
 
-void map_vul_scherm(map_t *map, scherm_kaderdata_t *kaderdata) {
+void map_vul_scherm(map_opslag_e index, scherm_kaderdata_t *kaderdata) {
+	map_t * map = map_opslag[index];
     for (uint32_t y = 0; y < kaderdata->hoogte; y += CEL_MAAT_Y) {
         for (uint32_t x = 0; x < kaderdata->breedte;
              x += CEL_MAAT_X) {

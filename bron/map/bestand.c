@@ -12,7 +12,7 @@ static inline melding_e bestand_lees_nummer(FILE *bestand,
     melding_e melding = melding_fout;
     *nummer = 0;
     char c = fgetc(bestand);
-    while (!feof(bestand) || bestand_is_nummer(c)) {
+    while (!feof(bestand) && bestand_is_nummer(c)) {
         *nummer = *nummer * 10 + (c - 48);
         melding = melding_ok;
         c = fgetc(bestand);
@@ -47,16 +47,13 @@ void bestand_zoek_sector(FILE *bestand, char label[static 1]) {
 uint32_t bestand_lees_sector_poorten(
     FILE *bestand, char label_begin[static 1],
     char label_eind[static 1], map_poort_t out[static MAX_POORTEN]) {
-    uint8_t i;
 
     bestand_zoek_sector(bestand, label_begin);
-	printf("%c", fgetc(bestand));
-    for (i = 0; i < MAX_POORTEN; i++) {
+    for (uint32_t i = 0; i < MAX_POORTEN; i++) {
         bestand_lees_nummer(bestand, &out[i].naar);
         bestand_lees_nummer(bestand, &out[i].x);
         bestand_lees_nummer(bestand, &out[i].y);
         bestand_lees_nummer(bestand, &out[i].richting);
-		printf("%i\n", out[i].naar);
     }
 
     if (!bestand_is_label(bestand, label_eind)) {
@@ -64,7 +61,7 @@ uint32_t bestand_lees_sector_poorten(
         return 0;
     }
 
-    return i;
+    return MAX_POORTEN;
 }
 
 uint32_t bestand_lees_sector(FILE *bestand,
