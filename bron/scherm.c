@@ -96,8 +96,8 @@ melding_e scherm_start(HINSTANCE instantie,
         return melding_fout;
     }
 
-    map_t *map = map_alloceer();
-    map_laad(map, map_id_0);
+    map_opslag_e i = map_alloceer();
+    map_laad(i, map_id_0);
 
     ShowWindow(hendel, n_cmd_show);
 
@@ -106,13 +106,13 @@ melding_e scherm_start(HINSTANCE instantie,
         TranslateMessage(&bericht);
         DispatchMessage(&bericht);
 
-        map_vul_scherm(map, &kaderdata);
+        map_vul_scherm(i, &kaderdata);
 
         InvalidateRect(hendel, NULL, false);
         UpdateWindow(hendel);
     }
 
-    map_vrijmaken(map);
+    map_vrijmaken(i);
 
     return melding_ok;
 }

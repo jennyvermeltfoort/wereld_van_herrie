@@ -49,12 +49,6 @@ typedef enum : uint8_t {
 } map_richting_e;
 
 typedef struct {
-    map_poort_t poorten[MAP_MAAT];
-    uint8_t eigenschappen[MAP_MAAT];
-    uint32_t *terrein[MAP_MAAT];
-} map_t;
-
-typedef struct {
     map_id_e naar;
     uint8_t x;
     uint8_t y;
@@ -62,17 +56,24 @@ typedef struct {
 } map_poort_t;
 
 typedef struct {
+    map_poort_t poorten[MAP_MAAT];
+    uint8_t eigenschappen[MAP_MAAT];
+    uint32_t *terrein[MAP_MAAT];
+} map_t;
+
+
+typedef struct {
     map_poort_t poorten[MAX_POORTEN];
     uint8_t eigenschappen[MAP_MAAT];
     uint8_t terrein[MAP_MAAT];
 } map_bestand_t;
 
-map_t *map_alloceer(void);
-void map_vrijmaken(map_t *map);
+map_opslag_e map_alloceer(void);
+void map_vrijmaken(map_opslag_e index);
 
-melding_e map_laad(map_t *map, map_id_e map_nr);
+melding_e map_laad(map_opslag_e index, map_id_e map_nr);
 
-void map_vul_scherm(map_t *map, scherm_kaderdata_t *kaderdata);
+void map_vul_scherm(map_opslag_e index, scherm_kaderdata_t *kaderdata);
 void map_lees_bestand(FILE *bestand, map_bestand_t *map);
 
 #endif  // __WACHTER_MAP_H

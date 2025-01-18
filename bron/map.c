@@ -14,6 +14,7 @@
 #define CEL_MAAT_X 16
 #define CEL_MAAT_Y 16
 #define CEL_MAAT CEL_MAAT_X *CEL_MAAT_Y
+#define MAP_OPSLAG_MAX 16
 
 typedef uint32_t cel_t[CEL_MAAT];
 
@@ -43,26 +44,25 @@ char *map_data_locaties[] = {
     [map_id_7] = "mappen/o/map7.data.o",
 };
 
-#define MAP_OPSLAG_MAX 16
 map_t *map_opslag[map_opslag_max] = {};
 uint8_t map_opslag_index = 0;
 
 map_opslag_e map_alloceer(void) {
-    if (map_storage_index >= map_opslag_max) {
-        free(map_storage[0]);
-        map_storage_index = 0;
+    if (map_opslag_index >= map_opslag_max) {
+        free(map_opslag[0]);
+        map_opslag_index = 0;
     }
-
     map_opslag[map_opslag_index++] = malloc(sizeof(map_t));
-    return map_opslag_index;
+    return map_opslag_index - 1;
 }
 
 void map_vrijmaken(map_opslag_e index) {
     free(map_opslag[index]);
-    map_opslag[index] == NULL;
+    map_opslag[index] = NULL;
     while ((index + 1) < map_opslag_max && map_opslag[++index] != NULL) {
         map_opslag[index - 1] = map_opslag[index];
     }
+    map_opslag_index--;
 }
 
 melding_e map_laad(map_opslag_e index, map_id_e map_nr) {
@@ -84,7 +84,7 @@ melding_e map_laad(map_opslag_e index, map_id_e map_nr) {
 }
 
 void map_vul_scherm(map_opslag_e index, scherm_kaderdata_t *kaderdata) {
-	map_t * map = map_opslag[index];
+    map_t * map = map_opslag[index];
     for (uint32_t y = 0; y < kaderdata->hoogte; y += CEL_MAAT_Y) {
         for (uint32_t x = 0; x < kaderdata->breedte;
              x += CEL_MAAT_X) {
