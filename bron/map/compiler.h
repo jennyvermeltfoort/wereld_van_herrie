@@ -4,12 +4,16 @@
 
 #include <stdint.h>
 
+
+#define MAP_START_POORTEN 0x25
+
+
 #define ONGEDEFINEERD 0XFF
 static const uint8_t ascii_naar_waarde[] = {[0 ... 47] = ONGEDEFINEERD,
                                      [58 ... 64] = ONGEDEFINEERD,
                                      [91 ... 96] = ONGEDEFINEERD,
                                      [123 ... 127] = ONGEDEFINEERD,
-                                     [48] = 0x00,
+                                     [48] = 0x00, // 0 -> 9
                                      [49] = 0x01,
                                      [50] = 0x02,
                                      [51] = 0x03,
@@ -19,7 +23,7 @@ static const uint8_t ascii_naar_waarde[] = {[0 ... 47] = ONGEDEFINEERD,
                                      [55] = 0x07,
                                      [56] = 0x08,
                                      [57] = 0x09,
-                                     [65] = 0x0A,
+                                     [65] = 0x0A, // A -> Z
                                      [66] = 0x0B,
                                      [67] = 0x0C,
                                      [68] = 0x0D,
@@ -45,7 +49,7 @@ static const uint8_t ascii_naar_waarde[] = {[0 ... 47] = ONGEDEFINEERD,
                                      [88] = 0x21,
                                      [89] = 0x23,
                                      [90] = 0x24,
-                                     [97] = 0x25,
+                                     [97] = 0x25, // a -> z
                                      [98] = 0x26,
                                      [99] = 0x27,
                                      [100] = 0x28,

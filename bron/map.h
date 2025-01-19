@@ -61,7 +61,6 @@ typedef struct {
     uint32_t *terrein[MAP_MAAT];
 } map_t;
 
-
 typedef struct {
     map_poort_t poorten[MAX_POORTEN];
     uint8_t eigenschappen[MAP_MAAT];
@@ -73,7 +72,8 @@ void map_vrijmaken(map_opslag_e index);
 
 melding_e map_laad(map_opslag_e index, map_id_e map_nr);
 
-void map_vul_scherm(map_opslag_e index, scherm_kaderdata_t *kaderdata);
+void map_vul_scherm(map_opslag_e index,
+                    scherm_kaderdata_t *kaderdata);
 void map_lees_bestand(FILE *bestand, map_bestand_t *map);
 
 #endif  // __WACHTER_MAP_H
