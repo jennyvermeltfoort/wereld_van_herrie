@@ -10,7 +10,7 @@ DOELWIT_DEBUG = spel_debug.exe
 DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
-CFLAG = --std=c23 -Wall
+CFLAG = -g --std=c23 -Wall
 BIEBS = -lraylib
 
 ${DOELWIT}: ${OBJECTEN}

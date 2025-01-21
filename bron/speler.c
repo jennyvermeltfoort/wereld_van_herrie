@@ -4,11 +4,11 @@
 #include "entiteit.h"
 #include "speler.h"
 
-bitmap_t speler_bitmap = {
-    .w = {[0 ...(0XFF - 1)] = {
-              .r = 255, .b = 255, .g = 255, .a = 255}}};
+ENTITEIT_MAAK(speler, entiteit_rang_l0);
 
-entiteit_t *speler = NULL;
+static bitmap_t speler_bitmap = {
+    .w = {[0 ...0XFF] = {
+              .r = 255, .b = 255, .g = 255, .a = 255}}};
 
 void speler_verplaats_omhoog(void) {
     speler->y -= 5;
@@ -26,12 +26,9 @@ void speler_verplaats_rechts(void) {
     speler->x += 5;
 }
 
+void speler_bereidvoor(void) __attribute__((constructor));
 void speler_bereidvoor(void) {
-    if (speler == NULL) {
-        speler = entiteit_maak(entiteit_rang_l0);
-        speler->bitmap = &speler_bitmap;
-    }
-
+    speler->bitmap = &speler_bitmap;
     bediening_registreer_toets(KEY_UP,
                                speler_verplaats_omhoog);
     bediening_registreer_toets(KEY_DOWN,

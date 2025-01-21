@@ -7,7 +7,7 @@
 
 #define BITMAP_MAAT_X 16
 #define BITMAP_MAAT_Y 16
-#define BITMAP_MAAT BITMAP_MAAT_X *BITMAP_MAAT_Y
+#define BITMAP_MAAT BITMAP_MAAT_X * BITMAP_MAAT_Y
 typedef struct Color pixel_t;
 typedef struct { 
     pixel_t w[BITMAP_MAAT];

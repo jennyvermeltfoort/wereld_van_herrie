@@ -23,11 +23,19 @@ typedef struct {
     uint16_t x;
     uint16_t y;
     entiteit_richting_e richting;
-    bitmap_t *bitmap;
+    bitmap_t* bitmap;
 } entiteit_t;
 
 entiteit_t* entiteit_maak(entiteit_rang_e rang);
 void entiteit_zuiver(void);
 void entiteit_teken(void);
+
+#define ENTITEIT_MAAK(_entiteit, _rang)     \
+    entiteit_t * _entiteit;                  \
+    static void __maak_##_entiteit(void)   \
+        __attribute__((constructor));     \
+    static void __maak_##_entiteit(void) { \
+        _entiteit = entiteit_maak(_rang);   \
+    }
 
 #endif  //  __WACHTER_ENTITEIT_H

@@ -97,14 +97,14 @@ static const uint8_t map_deeling_waarde[] = {
     [122] = 0x3E};
 
 bitmap_t map_terrein_pad = {
-    .w = {[0 ...(0XFF - 1)] = {
+    .w = {[0 ...0XFF] = {
               .r = 100, .b = 100, .g = 150, .a = 100}}};
 bitmap_t map_terrein_boom = {
     .w = {
-        [0 ...(0XFF - 1)] = {.r = 50, .b = 50, .g = 255, .a = 100}}};
+        [0 ...0XFF] = {.r = 50, .b = 50, .g = 255, .a = 100}}};
 bitmap_t map_terrein_water = {
     .w = {
-        [0 ...(0XFF - 1)] = {.r = 50, .b = 255, .g = 50, .a = 100}}};
+        [0 ...0XFF] = {.r = 50, .b = 255, .g = 50, .a = 100}}};
 bitmap_t *terrein_vertaler[] = {
     [0] = &map_terrein_pad,
     [1] = &map_terrein_boom,
@@ -143,6 +143,7 @@ melding_e map_laad(map_id_e map_nr) {
     return melding_ok;
 }
 
+void map_bereidvoor(void) __attribute__((constructor));
 void map_bereidvoor(void) { map_laad(map_id_0); }
 
 void map_teken(void) {
