@@ -1,118 +1,45 @@
 
-#include "scherm.h"
-
 #include <stdbool.h>
 
 #include "bediening.h"
 #include "map.h"
+#include "scherm.h"
 #include "speler.h"
 
-BITMAPINFO kader_bitkaart_info;
-HBITMAP kader_bitkaart = 0;
-HDC kader_apparaat_context = 0;
+melding_e scherm_start(void) {
+    InitWindow(800, 450, "Wereld van Herrie");
 
-scherm_kaderdata_t kaderdata = {};
+    map_t *map = map_alloceer();
+    map_laad(map, map_id_0);
 
-LRESULT CALLBACK scherm_verwerk_bericht(HWND hendel, UINT bericht,
-                                        WPARAM wparam,
-                                        LPARAM lparam) {
-    switch (bericht) {
-        case WM_PAINT: {
-            PAINTSTRUCT paint;
-            HDC device_context;
-            device_context = BeginPaint(hendel, &paint);
-            BitBlt(device_context, paint.rcPaint.left,
-                   paint.rcPaint.top,
-                   paint.rcPaint.right - paint.rcPaint.left,
-                   paint.rcPaint.bottom - paint.rcPaint.top,
-                   kader_apparaat_context, paint.rcPaint.left,
-                   paint.rcPaint.top, SRCCOPY);
-            EndPaint(hendel, &paint);
-        } break;
+    while (!WindowShouldClose()) {
+        BeginDrawing();
 
-        case WM_SIZE: {
-            kader_bitkaart_info.bmiHeader.biWidth = LOWORD(lparam);
-            kader_bitkaart_info.bmiHeader.biHeight = HIWORD(lparam);
+        for (uint32_t y = 0; y < MAP_MAAT_Y; y++) {
+            for (uint32_t x = 0; x < MAP_MAAT_X; x++) {
+                map_cel_t *p = map->terrein[y * MAP_MAAT_X + x];
+                for (uint32_t ci = 0; ci < CEL_MAAT; ci++) {
+                    uint32_t ypos =
+                        (ci / CEL_MAAT_X) + y * CEL_MAAT_Y;
+                    uint32_t xpos =
+                        (ci % CEL_MAAT_X) + x * CEL_MAAT_X;
 
-            if (kader_bitkaart) {
-                DeleteObject(kader_bitkaart);
+                    if (xpos >= 800) {
+                        continue;
+                    }
+
+                    if (ypos >= 450) {
+                        break;
+                    }
+
+                    DrawPixel(xpos, ypos, p[ci]);
+                }
             }
-
-            kader_bitkaart = CreateDIBSection(
-                NULL, &kader_bitkaart_info, DIB_RGB_COLORS,
-                (void **)&kaderdata.pixels, 0, 0);
-            SelectObject(kader_apparaat_context, kader_bitkaart);
-
-            kaderdata.breedte = LOWORD(lparam);
-            kaderdata.hoogte = HIWORD(lparam);
-        } break;
-
-        case WM_CLOSE: {
-            DestroyWindow(hendel);
-        } break;
-
-        case WM_DESTROY: {
-            PostQuitMessage(0);
-        } break;
-
-        case WM_KEYDOWN: {
-            bediening_data_t data = {.plat = lparam};
-            bediening_verwerk_toets(wparam, &data);
-        }; break;
-
-        default: {
-            return DefWindowProc(hendel, bericht, wparam, lparam);
         }
-    }
-    return 0;
-}
 
-melding_e scherm_start(HINSTANCE instantie,
-                       HINSTANCE instantie_vorige, LPSTR lp_cmd_line,
-                       int n_cmd_show) {
-    const char naam_klas[] = "HerrieClass";
-    WNDCLASS klas = {
-        .lpfnWndProc = scherm_verwerk_bericht,
-        .hInstance = instantie,
-        .lpszClassName = naam_klas,
-    };
-
-    if (!RegisterClass(&klas)) {
-        return melding_fout;
+        EndDrawing();
     }
 
-    kader_bitkaart_info.bmiHeader.biSize =
-        sizeof(kader_bitkaart_info.bmiHeader);
-    kader_bitkaart_info.bmiHeader.biPlanes = 1;
-    kader_bitkaart_info.bmiHeader.biBitCount = 32;
-    kader_bitkaart_info.bmiHeader.biCompression = BI_RGB;
-    kader_apparaat_context = CreateCompatibleDC(0);
-
-    HWND hendel = CreateWindow(naam_klas, "Wereld van Herrie",
-                               WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0,
-                               950, 950, NULL, NULL, instantie, NULL);
-
-    if (hendel == NULL) {
-        return melding_fout;
-    }
-
-    map_opslag_e i = map_alloceer();
-    map_laad(i, map_id_0);
-
-    ShowWindow(hendel, n_cmd_show);
-
-    MSG bericht = {};
-    while (GetMessage(&bericht, NULL, 0, 0) > 0) {
-        TranslateMessage(&bericht);
-        DispatchMessage(&bericht);
-
-        map_vul_scherm(i, &kaderdata);
-
-        InvalidateRect(hendel, NULL, false);
-        UpdateWindow(hendel);
-    }
-
-    map_vrijmaken(i);
-
+    map_dealloceer(map);
     return melding_ok;
 }

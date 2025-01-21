@@ -1,4 +1,6 @@
--std=c23
 -Wall
--ID:\msys64\mingw64\include
--ID:\msys64\mingw64\lib
+-std=c23
+-I/usr/include
+-L/usr/lib
+-L/lib
+

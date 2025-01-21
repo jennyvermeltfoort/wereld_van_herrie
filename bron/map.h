@@ -3,12 +3,25 @@
 
 #include <stdio.h>
 
+#include "raylib.h"
 #include "scherm.h"
+
+#define CEL_MAAT_X 16
+#define CEL_MAAT_Y 16
+#define CEL_MAAT CEL_MAAT_X *CEL_MAAT_Y
 
 #define MAX_POORTEN 16
 #define MAP_MAAT_X 28
 #define MAP_MAAT_Y 28
 #define MAP_MAAT MAP_MAAT_X *MAP_MAAT_Y
+
+typedef struct Color map_cel_t;
+
+typedef enum : uint8_t {
+    map_eigenschap_bewandelbaar = 0,
+    map_eigenschap_onberijkbaar = 1,
+    map_eigenschap_poort = 2,
+} map_cel_eigenschap_e;
 
 typedef enum : uint8_t {
     map_id_0 = 0,
@@ -20,26 +33,6 @@ typedef enum : uint8_t {
     map_id_6 = 6,
     map_id_7 = 7,
 } map_id_e;
-
-typedef enum : uint8_t {
-    map_opslag_0 = 0,
-    map_opslag_1,
-    map_opslag_2,
-    map_opslag_3,
-    map_opslag_4,
-    map_opslag_5,
-    map_opslag_6,
-    map_opslag_7,
-    map_opslag_8,
-    map_opslag_9,
-    map_opslag_10,
-    map_opslag_11,
-    map_opslag_12,
-    map_opslag_13,
-    map_opslag_14,
-    map_opslag_15,
-    map_opslag_max,
-} map_opslag_e;
 
 typedef enum : uint8_t {
     map_richting_omhoog = 0,
@@ -58,22 +51,13 @@ typedef struct {
 typedef struct {
     map_poort_t poorten[MAP_MAAT];
     uint8_t eigenschappen[MAP_MAAT];
-    uint32_t *terrein[MAP_MAAT];
+    map_cel_t *terrein[MAP_MAAT];
 } map_t;
 
-typedef struct {
-    map_poort_t poorten[MAX_POORTEN];
-    uint8_t eigenschappen[MAP_MAAT];
-    uint8_t terrein[MAP_MAAT];
-} map_bestand_t;
-
-map_opslag_e map_alloceer(void);
-void map_vrijmaken(map_opslag_e index);
-
-melding_e map_laad(map_opslag_e index, map_id_e map_nr);
-
-void map_vul_scherm(map_opslag_e index,
-                    scherm_kaderdata_t *kaderdata);
-void map_lees_bestand(FILE *bestand, map_bestand_t *map);
+map_t *map_alloceer(void);
+void map_dealloceer(map_t *map);
+void map_vrijmaken(map_t *map);
+melding_e map_laad(map_t *map, map_id_e map_nr);
+uint32_t map_compile(FILE *ingang, FILE*uitgang);
 
 #endif  // __WACHTER_MAP_H

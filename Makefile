@@ -1,9 +1,8 @@
 
 BRONNEN = $(wildcard bron/*.c)
-KOPPELINGEN = $(wildcard bron/*.h bron/map/*.h)
-OBJECTEN = ${BRONNEN:.c=.o}
-
-BRONNEN_MAP_COMPILER = $(wildcard bron/map/*.c)
+BRONNEN_MAP_COMPILER = bron/map.c bron/compiler.c
+KOPPELINGEN = $(wildcard bron/*.h)
+OBJECTEN = $(filter-out bron/compiler.o, ${BRONNEN:.c=.o})
 OBJECTEN_MAP_COMPILER = ${BRONNEN_MAP_COMPILER:.c=.o}
 
 DOELWIT = spel.exe
@@ -12,7 +11,7 @@ DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
 CFLAG = --std=c23 -Wall
-BIEBS = -lgdi32
+BIEBS = -lraylib
 
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}

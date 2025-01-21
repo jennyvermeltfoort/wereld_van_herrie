@@ -22,4 +22,5 @@ melding_e afbeelding_laad(char *bestand) {
     fread(&klomphoofd, 4, 2, b);
 
     fclose(b);
+    return melding_fout;
 }

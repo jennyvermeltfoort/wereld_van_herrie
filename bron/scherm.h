@@ -4,18 +4,10 @@
 #define __WACHTER_SCHERM_H
 
 #include <stdint.h>
-#include <windows.h>
+#include "raylib.h"
 
 #include "typen.h"
 
-typedef struct {
-    uint32_t breedte;
-    uint32_t hoogte;
-    uint32_t *pixels;
-} scherm_kaderdata_t;
-
-melding_e scherm_start(HINSTANCE instantie,
-                       HINSTANCE instantie_vorige, LPSTR lp_cmd_line,
-                       int n_cmd_show);
+melding_e scherm_start(void);
 
 #endif  // __WACHTER_SCHERM_H

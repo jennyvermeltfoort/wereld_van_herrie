@@ -1,6 +1,5 @@
-#include "speler.h"
-
 #include "bediening.h"
+#include "speler.h"
 
 entiteit_t speler_positie = {};
 
@@ -23,20 +22,20 @@ void speler_verplaats_rechts(bediening_data_t *data) {
 entiteit_t *speler_neem_positie(void) { return &speler_positie; }
 
 void speler_prepareer(void) {
-    bediening_registreer_toets(bediening_toets_omhoog,
+    bediening_registreer_toets(KEY_UP,
                                speler_verplaats_omhoog);
-    bediening_registreer_toets(bediening_toets_omlaag,
+    bediening_registreer_toets(KEY_DOWN,
                                speler_verplaats_omlaag);
-    bediening_registreer_toets(bediening_toets_links,
+    bediening_registreer_toets(KEY_LEFT,
                                speler_verplaats_links);
-    bediening_registreer_toets(bediening_toets_rechts,
+    bediening_registreer_toets(KEY_RIGHT,
                                speler_verplaats_rechts);
-    bediening_registreer_toets(bediening_toets_w,
+    bediening_registreer_toets(KEY_W,
                                speler_verplaats_omhoog);
-    bediening_registreer_toets(bediening_toets_s,
+    bediening_registreer_toets(KEY_S,
                                speler_verplaats_omlaag);
-    bediening_registreer_toets(bediening_toets_a,
+    bediening_registreer_toets(KEY_A,
                                speler_verplaats_links);
-    bediening_registreer_toets(bediening_toets_d,
+    bediening_registreer_toets(KEY_D,
                                speler_verplaats_rechts);
 }
