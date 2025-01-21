@@ -2,12 +2,6 @@
 #ifndef __WACHTER_SPELER_H
 #define __WACHTER_SPELER_H
 
-#include <stdint.h>
-
-#include "entiteit.h"
-#include "typen.h"
-
-entiteit_t* speler_neem_positie(void);
-void speler_prepareer(void);
+void speler_bereidvoor(void);
 
 #endif  // __WACHTER_SPELER_H
