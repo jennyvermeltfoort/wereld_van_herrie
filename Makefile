@@ -11,7 +11,7 @@ DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
 CFLAG = -g --std=c23 -Wall
-BIEBS = -lraylib
+BIEBS = -lm -lraylib -lpng
 
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}

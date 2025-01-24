@@ -1,26 +1,24 @@
 #include <stdio.h>
 
+#include "afbeelding.h"
+#include "raylib.h"
 #include "typen.h"
 
-melding_e afbeelding_laad(char *bestand) {
-    FILE *b = fopen(bestand, "r");
+#define SPELER_TEGELKAART_LOCATIE "middelen/speler.png"
 
-    if (b == NULL) {
-        return melding_fout;
-    }
+struct Image afbeelding_speler;
 
-    uint64_t handtekening;
-    fread(&handtekening, sizeof(handtekening), 1, b);
-    if (handtekening != 0X89504E470D0A1A0A) {
-        return melding_fout;
-    }
+void afbeelding_laad(char *locatie, struct Image *afbeelding) {
+    *afbeelding = LoadImage(locatie);
+}
 
-    struct {
-        uint64_t lengte;
-        uint64_t type;
-    } klomphoofd;
-    fread(&klomphoofd, 4, 2, b);
+void afbeelding_dealloceer(void) { UnloadImage(afbeelding_speler); }
 
-    fclose(b);
-    return melding_fout;
+void afbeelding_teken(int x, int y) {
+    ImageDrawRectangle(&afbeelding_speler, x, y, BITMAP_MAAT_X, BITMAP_MAAT_Y,(struct Color){0,0,0,0});
+}
+
+void afbeelding_bereidvoor(void) __attribute__((constructor(102)));
+void afbeelding_bereidvoor(void) {
+    afbeelding_laad(SPELER_TEGELKAART_LOCATIE, &afbeelding_speler);
 }

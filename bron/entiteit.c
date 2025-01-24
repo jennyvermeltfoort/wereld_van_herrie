@@ -1,6 +1,5 @@
-#include "raylib.h"
-
 #include "entiteit.h"
+#include "afbeelding.h"
 
 #define ENTITEIT_MAX 0XFF
 
@@ -34,8 +33,7 @@ void entiteit_teken(void) {
         entiteit_lijst_t *lijst = lijsten[r];
         for (uint32_t i = 0; i < lijst->index; i++) {
             entiteit_t *entiteit = &lijst->entiteiten[i];
-            bitmap_teken(entiteit->bitmap, entiteit->x, entiteit->y,
-                         800, 450);
+            afbeelding_teken(entiteit->bitmap.x, entiteit->bitmap.y);
         }
     }
 }

@@ -1,10 +1,9 @@
+#include "map.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "raylib.h"
-
-#include "entiteit.h"
-#include "map.h"
+#include "afbeelding.h"
 #include "typen.h"
 
 #define MAP_START_POORTEN 0x25
@@ -97,14 +96,17 @@ static const uint8_t map_deeling_waarde[] = {
     [122] = 0x3E};
 
 bitmap_t map_terrein_pad = {
-    .w = {[0 ...0XFF] = {
-              .r = 100, .b = 100, .g = 150, .a = 100}}};
+    .x = 16,
+    .y = 16,
+};
 bitmap_t map_terrein_boom = {
-    .w = {
-        [0 ...0XFF] = {.r = 50, .b = 50, .g = 255, .a = 100}}};
+    .x = 16,
+    .y = 16,
+};
 bitmap_t map_terrein_water = {
-    .w = {
-        [0 ...0XFF] = {.r = 50, .b = 255, .g = 50, .a = 100}}};
+    .x = 16,
+    .y = 16,
+};
 bitmap_t *terrein_vertaler[] = {
     [0] = &map_terrein_pad,
     [1] = &map_terrein_boom,
@@ -112,14 +114,10 @@ bitmap_t *terrein_vertaler[] = {
 };
 
 const char *map_data_locaties[] = {
-    [map_id_0] = "mappen/o/map0.data.o",
-    [map_id_1] = "mappen/o/map1.data.o",
-    [map_id_2] = "mappen/o/map2.data.o",
-    [map_id_3] = "mappen/o/map3.data.o",
-    [map_id_4] = "mappen/o/map4.data.o",
-    [map_id_5] = "mappen/o/map5.data.o",
-    [map_id_6] = "mappen/o/map6.data.o",
-    [map_id_7] = "mappen/o/map7.data.o",
+    [map_id_0] = "mappen/o/map0.data.o", [map_id_1] = "mappen/o/map1.data.o",
+    [map_id_2] = "mappen/o/map2.data.o", [map_id_3] = "mappen/o/map3.data.o",
+    [map_id_4] = "mappen/o/map4.data.o", [map_id_5] = "mappen/o/map5.data.o",
+    [map_id_6] = "mappen/o/map6.data.o", [map_id_7] = "mappen/o/map7.data.o",
 };
 
 static map_t map_kern = {};
@@ -129,6 +127,7 @@ melding_e map_laad(map_id_e map_nr) {
 
     FILE *bestand = fopen(map_data_locaties[map_nr], "r");
     if (bestand == NULL) {
+        printf("map_laad: bestand is niet open, %s.", map_data_locaties[map_nr]);
         return melding_fout;
     }
 
@@ -136,8 +135,7 @@ melding_e map_laad(map_id_e map_nr) {
     fclose(bestand);
 
     for (uint32_t i = 0; i < MAP_MAAT; i++) {
-        map_kern.terrein[i] =
-            terrein_vertaler[map_bestand.terrein[i]];
+        map_kern.terrein[i] = terrein_vertaler[map_bestand.terrein[i]];
     }
 
     return melding_ok;
@@ -149,19 +147,15 @@ void map_bereidvoor(void) { map_laad(map_id_0); }
 void map_teken(void) {
     for (uint32_t y = 0; y < MAP_MAAT_Y; y++) {
         for (uint32_t x = 0; x < MAP_MAAT_X; x++) {
-            bitmap_teken(map_kern.terrein[y * MAP_MAAT_X + x],
-                         x * BITMAP_MAAT_X, y * BITMAP_MAAT_Y, 800,
-                         450);
+            afbeelding_teken(map_kern.terrein[y * MAP_MAAT_X + x]->x,
+                             map_kern.terrein[y * MAP_MAAT_X + x]->y);
         }
     }
 }
 
-static inline bool map_is_nummer(char c) {
-    return (47 < c && c < 58);
-}
+static inline bool map_is_nummer(char c) { return (47 < c && c < 58); }
 
-static inline melding_e map_lees_nummer(FILE *bestand,
-                                        uint8_t *nummer) {
+static inline melding_e map_lees_nummer(FILE *bestand, uint8_t *nummer) {
     melding_e melding = melding_fout;
     *nummer = 0;
     char c = fgetc(bestand);
@@ -180,8 +174,7 @@ static inline void map_consumeer_lijn(FILE *bestand) {
 static inline bool map_is_label(FILE *bestand, char label[static 1]) {
     uint8_t i = 0;
     char c;
-    while (!feof(bestand) && (c = fgetc(bestand)) == label[i++] &&
-           label[i] != '\0');
+    while (!feof(bestand) && (c = fgetc(bestand)) == label[i++] && label[i] != '\0');
     return (label[i] == '\0');
 }
 
@@ -196,9 +189,9 @@ void map_zoek_sector(FILE *bestand, char label[static 1]) {
     map_consumeer_lijn(bestand);
 }
 
-uint32_t map_lees_sector_poorten(
-    FILE *bestand, char label_begin[static 1],
-    char label_eind[static 1], map_poort_t out[static MAX_POORTEN]) {
+uint32_t map_lees_sector_poorten(FILE *bestand, char label_begin[static 1],
+                                 char label_eind[static 1],
+                                 map_poort_t out[static MAX_POORTEN]) {
     map_zoek_sector(bestand, label_begin);
     for (uint32_t i = 0; i < MAX_POORTEN; i++) {
         map_lees_nummer(bestand, &out[i].naar);
@@ -216,10 +209,8 @@ uint32_t map_lees_sector_poorten(
 }
 
 uint32_t map_lees_sector(FILE *bestand, char label_begin[static 1],
-                         char label_eind[static 1],
-                         uint8_t out[static MAP_MAAT]) {
-    const uint8_t buffer_omvang =
-        MAP_MAAT_X + 1;  // einde van een lijn is een nieuwlijn
+                         char label_eind[static 1], uint8_t out[static MAP_MAAT]) {
+    const uint8_t buffer_omvang = MAP_MAAT_X + 1;  // einde van een lijn is een nieuwlijn
     uint32_t geschreven = 0;
     uint8_t in[buffer_omvang];
     uint8_t gelezen;
@@ -250,12 +241,11 @@ void map_schrijf_map(FILE *bestand, map_bestand_t *bmap) {
 uint32_t map_compile(FILE *ingang, FILE *uitgang) {
     map_bestand_t bmap = {};
     uint32_t geschreven =
-        map_lees_sector_poorten(ingang, "__start_poorten",
-                                "__eind_poorten", bmap.poorten) +
-        map_lees_sector(ingang, "__start_terrein", "__eind_terrein",
-                        bmap.terrein) +
-        map_lees_sector(ingang, "__start_eigenschappen",
-                        "__eind_eigenschappen", bmap.eigenschappen);
+        map_lees_sector_poorten(ingang, "__start_poorten", "__eind_poorten",
+                                bmap.poorten) +
+        map_lees_sector(ingang, "__start_terrein", "__eind_terrein", bmap.terrein) +
+        map_lees_sector(ingang, "__start_eigenschappen", "__eind_eigenschappen",
+                        bmap.eigenschappen);
     map_schrijf_map(uitgang, &bmap);
     return geschreven;
 }
