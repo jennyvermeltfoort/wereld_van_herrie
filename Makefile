@@ -11,13 +11,13 @@ DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
 CFLAG = -g --std=c23 -Wall
-BIEBS = -lm -lraylib -lpng
+BIEBS = -lm -ldl -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -lcglm
 
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}
 
 %.o: %.c 
-	${COMPILER} ${CFLAG} -c $< -o $@
+	${COMPILER} ${CFLAG} -c $< -o $@ ${BIEBS} 
 
 ${DOELWIT_MAP_COMPILER}: ${OBJECTEN_MAP_COMPILER}
 	${COMPILER} ${CFLAG} -o $@ $^
