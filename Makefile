@@ -11,7 +11,9 @@ DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
 CFLAG = -g --std=c23 -Wall
-BIEBS = -lm -ldl -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -lcglm
+BIEBS_WIN = -lglfw3 -lgdi32 -lopengl32
+BIEBS_LIN = -lm -ldl -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -lcglm 
+BIEBS = ${BIEBS_WIN}
 
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}
