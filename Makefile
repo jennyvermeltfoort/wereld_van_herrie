@@ -13,7 +13,7 @@ COMPILER = gcc
 CFLAG = -g --std=c23 -Wall
 BIEBS_WIN = -lglfw3 -lgdi32 -lopengl32
 BIEBS_LIN = -lm -ldl -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -lcglm 
-BIEBS = ${BIEBS_WIN}
+BIEBS = ${BIEBS_LIN}
 
 ${DOELWIT}: ${OBJECTEN}
 	${COMPILER} ${CFLAG} -o $@ $^ ${BIEBS}
