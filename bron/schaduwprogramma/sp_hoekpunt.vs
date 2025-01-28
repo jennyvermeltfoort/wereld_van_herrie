@@ -8,10 +8,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform float tiles;
+uniform vec2 tiles;
+uniform vec2 tcoord;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(vertex, 1.0);
-    TexCoords = vec2(texture.x / tiles, 1.0 - texture.y);
+    TexCoords = vec2((tcoord.x + texture.x) / tiles.x, 1.0 - (texture.y + tcoord.y) / tiles.y);
 }

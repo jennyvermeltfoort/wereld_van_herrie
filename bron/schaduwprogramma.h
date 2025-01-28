@@ -2,18 +2,19 @@
 #ifndef __WACHTER_SCHADUWPROGRAMMA_H
 #define __WACHTER_SCHADUWPROGRAMMA_H
 
+#include <cglm/cglm.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
-uint32_t sp_maak_programma(char *bestand_hoek,
-                           char *bestand_fragment);
-void sp_uniform_zet_bool(uint32_t programma, char *uniform,
-                         bool waarde);
-void sp_uniform_zet_int(uint32_t programma, char *uniform,
-                        uint32_t waarde);
-void sp_uniform_zet_float(uint32_t programma, char *uniform,
-                          float waarde);
+uint32_t sp_maak_programma(char *bestand_hoek, char *bestand_fragment);
+void sp_uniform_zet_bool(uint32_t programma, char *uniform, bool waarde);
+void sp_uniform_zet_int(uint32_t programma, char *uniform, uint32_t waarde);
+void sp_uniform_zet_float(uint32_t programma, char *uniform, float waarde);
 void sp_gebruik(uint32_t programma);
 void sp_verwijder(uint32_t programma);
+void sp_gebruik_texture(uint32_t sp, uint32_t texture, vec2 tiles);
+
+uint32_t sp_laad_texture(char *locatie);
 
 #endif  //  __WACHTER_SCHADUWPROGRAMMA_H
