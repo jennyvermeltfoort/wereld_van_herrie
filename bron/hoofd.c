@@ -73,7 +73,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) press_right = false;
 }
 
-void draw_cube_walls(unsigned int sp, unsigned int vao, vec3s position, unsigned int texture) {
+void draw_cube_walls(unsigned int sp, unsigned int vao, vec3s position,
+                     unsigned int texture) {
     mat4s model = glms_mat4_identity();
     model = glms_translate(model, position);
     model = glms_scale(model, (vec3s){.x = 1.0f, .y = 2.0f, .z = 1.0f});
@@ -90,7 +91,8 @@ void draw_cube_walls(unsigned int sp, unsigned int vao, vec3s position, unsigned
     glBindVertexArray(0);
 }
 
-void draw_cube_top(unsigned int sp, unsigned int vao, vec3s position, unsigned int texture) {
+void draw_cube_top(unsigned int sp, unsigned int vao, vec3s position,
+                   unsigned int texture) {
     mat4s model = glms_mat4_identity();
     model = glms_translate(model, position);
     int modelLoc = glGetUniformLocation(sp, "model");
@@ -141,10 +143,10 @@ typedef struct {
     entity_t list[256];
 } world_entity_t;
 
-world_entity_t world_entities[WORLD_Z][WORLD_X] = {
-    0
-};
- 
+entity_t world_entities[WORLD_Z][WORLD_X];
+
+world_entity_t world_entities[WORLD_Z][WORLD_X] = {0};
+
 unsigned char ent_add(vec3s position, unsigned int id, unsigned int texture) {
     world_entity_t *l = &world_entities[(int)position.z][(int)position.x];
     entity_t *e;
@@ -165,7 +167,7 @@ void ent_remove(vec3s position, unsigned char index) {
     world_entity_t *l = &world_entities[(int)position.z][(int)position.x];
     entity_t *e = &l->list[index];
     entity_t *p = &l->list[e->prev];
-    p->next = e->next; 
+    p->next = e->next;
     e->next = 0;
     l->count--;
     if (index == l->start) {
@@ -179,7 +181,7 @@ void ent_draw(vec3s position, unsigned int sp, unsigned int vao) {
     entity_t *e = &l->list[l->start];
 
     while (e->next != 0) {
-        draw_player(e->position, sp, vao, e->texture); 
+        draw_player(e->position, sp, vao, e->texture);
         e = &l->list[e->next];
     }
 }
@@ -191,11 +193,11 @@ void draw_world(unsigned int sp, unsigned int vao) {
             if (var == 1) {
                 draw_cube_top(sp, vao, (vec3s){.x = x, .y = 1.0f, .z = z}, texture1);
                 draw_cube_walls(sp, vao, (vec3s){.x = x, .y = 0.0f, .z = z}, texture1);
-            } else           if (var == 0) {
+            } else if (var == 0) {
                 draw_cube_top(sp, vao, (vec3s){.x = x, .y = -1.0f, .z = z}, texture1);
             }
-            if ((z-1) >=0 && world_entities[z-1][x].count != 0) {
-                ent_draw((vec3s){.x = x, .y = 0.0f, .z = z-1}, sp, vao);
+            if ((z - 1) >= 0 && world_entities[z - 1][x].count != 0) {
+                ent_draw((vec3s){.x = x, .y = 0.0f, .z = z - 1}, sp, vao);
             }
         }
     }
@@ -223,8 +225,8 @@ int main() {
         return -1;
     }
 
-    uint32_t sp = sp_maak_programma("bron/schaduwprogramma/sp_hoekpunt.c",
-                                    "bron/schaduwprogramma/sp_fragment.c");
+    uint32_t sp = sp_maak_programma("bron/schaduwprogramma/sp_hoekpunt.vs",
+                                    "bron/schaduwprogramma/sp_fragment.vs");
 
     unsigned int VBO, VAO, EBO;
 
@@ -244,17 +246,17 @@ int main() {
         // left face
         0.0f, 0.0f, 0.0f, 2.0f, 0.0f,  //
         0.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,   //
-        0.0f, 1.0f, 1.0f, 3.0f, 1.0f,   //
+        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,  //
+        0.0f, 1.0f, 1.0f, 3.0f, 1.0f,  //
         0.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,   //
+        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,  //
         // top face
         0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  //
         1.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,   //
-        1.0f, 1.0f, 1.0f, 2.0f, 0.0f,   //
+        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,  //
+        1.0f, 1.0f, 1.0f, 2.0f, 0.0f,  //
         1.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,   //
+        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,  //
     };
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -330,9 +332,9 @@ int main() {
     vec3s camera = {.x = 0.0f, .y = 2.0f, .z = 0.0f};
 
     unsigned char player_index = ent_add(player, 0, texture2);
-    
 
-    while (!glfwWindowShouldClose(window)) {
+    int bla = 1000;
+    while (!glfwWindowShouldClose(window) && bla--) {
         processInput(window);
 
         glClearColor(0.4f, 0.4f, 0.5f, 1.0f);
@@ -359,24 +361,20 @@ int main() {
         bool moved = false;
         vec3s player_old = player;
         if (press_up && world[(int)(player.z + 0.8f)][(int)(player.x)] == 0 &&
-            world[(int)(player.z + 0.8f)][(int)(player.x + 1.0f)] == 0)
-        {
+            world[(int)(player.z + 0.8f)][(int)(player.x + 1.0f)] == 0) {
             player.z -= move;
             moved = true;
         }
         if (press_down && world[(int)(player.z + 1.2f)][(int)(player.x)] == 0 &&
-            world[(int)(player.z + 1.2f)][(int)(player.x + 1.0f)] == 0)
-        {
+            world[(int)(player.z + 1.2f)][(int)(player.x + 1.0f)] == 0) {
             player.z += move;
             moved = true;
         }
-        if (press_left && world[(int)(player.z + 1.0f)][(int)(player.x - 0.2f)] == 0)
-        {
+        if (press_left && world[(int)(player.z + 1.0f)][(int)(player.x - 0.2f)] == 0) {
             player.x -= move;
             moved = true;
         }
-        if (press_right && world[(int)(player.z + 1.0f)][(int)(player.x + 1.2f)] == 0)
-        {
+        if (press_right && world[(int)(player.z + 1.0f)][(int)(player.x + 1.2f)] == 0) {
             player.x += move;
             moved = true;
         }

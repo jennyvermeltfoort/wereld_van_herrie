@@ -10,7 +10,7 @@ DOELWIT_DEBUG = spel_debug.exe
 DOELWIT_MAP_COMPILER = map_compiler.exe
 
 COMPILER = gcc
-CFLAG = -g --std=c23 -Wall
+CFLAG = -o3 -g --std=c23 -Wall
 BIEBS_WIN = -lglfw3 -lgdi32 -lopengl32
 BIEBS_LIN = -lm -ldl -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -lcglm 
 BIEBS = ${BIEBS_LIN}
