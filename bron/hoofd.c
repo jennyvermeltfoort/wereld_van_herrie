@@ -41,8 +41,8 @@ int world[WORLD_Z][WORLD_X] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  //
 };
 
-unsigned int texture1;
-unsigned int texture2;
+unsigned int textuur1;
+unsigned int textuur2;
 
 bool press_w = false;
 bool press_s = false;
@@ -58,7 +58,8 @@ bool press_down = false;
 bool press_left = false;
 bool press_right = false;
 
-vec2 flip = {0.0f, 0.0f};
+int animatie_offset_x = 0;
+ivec2 animatie_frame = {0, 0};
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_W && action == GLFW_PRESS) press_w = true;
@@ -88,76 +89,66 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) press_right = false;
 }
 
-void draw_model(uint32_t sp, uint32_t vao, vec3s position, uint32_t start, uint32_t end) {
-    mat4s model = glms_mat4_identity();
-    model = glms_translate(model, position);
-    int modelLoc = glGetUniformLocation(sp, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)&model);
+void teken_model(programma_t *programma, vec3 positie, ivec2 hoeken) {
+    mat4 model;
+    glm_mat4_identity(model);
+    glm_translate(model, positie);
+    sp_uniform_zet_m4f(programma, "model", model);
+    sp_uniform_zet_2i(programma, "vak", (ivec2){0, 0});
 
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, start, end);
-    glBindVertexArray(0);
+    sp_teken_array(programma, hoeken);
 }
 
-void draw_model_sprite(uint32_t sp, uint32_t vao, vec3s position, uint32_t start,
-                       uint32_t end) {
-    mat4s model = glms_mat4_identity();
-    model = glms_translate(model, position);
-    model = glms_rotate(model, glm_rad(-45.0f), (vec3s){.y = 1.0f});
-    int tcoordLoc = glGetUniformLocation(sp, "tcoord");
-    glUniform2fv(tcoordLoc, 1, (GLfloat *)flip);
-    int modelLoc = glGetUniformLocation(sp, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)&model);
+void teken_model_sprite(programma_t *programma, vec3 positie, ivec2 hoeken) {
+    mat4 model;
+    glm_mat4_identity(model);
+    glm_translate(model, positie);
+    glm_rotate(model, glm_rad(-45.0f), (vec3){0.0f, 1.0f, 0.0f});
+    sp_uniform_zet_m4f(programma, "model", model);
+    sp_uniform_zet_2i(programma, "vak",
+                      (ivec2){animatie_frame[0] + animatie_offset_x, animatie_frame[1]});
 
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, start, end);
-    glBindVertexArray(0);
-    glUniform2fv(tcoordLoc, 1, (GLfloat *)(vec2){0.0f, 0.0f});
+    sp_teken_array(programma, hoeken);
 }
 
-void draw_model_scaled(uint32_t sp, uint32_t vao, vec3s position, uint32_t start,
-                       uint32_t end, float yscale) {
-    mat4s model = glms_mat4_identity();
-    model = glms_translate(model, position);
-    model = glms_scale(model, (vec3s){.x = 1.0f, .y = yscale, .z = 1.0f});
-    int modelLoc = glGetUniformLocation(sp, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)&model);
+void teken_model_schaal(programma_t *programma, vec3 positie, ivec2 hoeken, vec3 schaal) {
+    mat4 model;
+    glm_mat4_identity(model);
+    glm_translate(model, positie);
+    glm_scale(model, schaal);
+    sp_uniform_zet_m4f(programma, "model", model);
+    sp_uniform_zet_2i(programma, "vak", (ivec2){0, 0});
 
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, start, end);
-    glBindVertexArray(0);
+    sp_teken_array(programma, hoeken);
 }
 
-unsigned int prev_drawn = 0xFF;
+unsigned int vorige_textuur = 0xFF;
 
-void draw_entity(unsigned int sp, unsigned int vao, entiteit_t *e) {
-    if (prev_drawn != e->texture) {
-        if (e->texture == texture1) {
-            sp_gebruik_texture(sp, e->texture, (vec2){3.0f, 1.0f});
-        } else {
-            sp_gebruik_texture(sp, e->texture, (vec2){4.0f, 4.0f});
-        }
+void teken_entiteit(programma_t *programma, entiteit_t *entiteit) {
+    if (vorige_textuur != entiteit->texture) {
+        sp_gebruik_textuur(programma, entiteit->texture);
     }
 
-    if (e->texture == texture1) {
-        draw_model_scaled(sp, vao, e->positie, e->start, e->eind, 3.0f);
+    if (entiteit->texture == textuur1) {
+        teken_model_schaal(programma, entiteit->positie, entiteit->hoeken,
+                           (vec3){1.0f, 3.0f, 1.0f});
     } else {
-        draw_model_sprite(sp, vao, e->positie, e->start, e->eind);
+        teken_model_sprite(programma, entiteit->positie, entiteit->hoeken);
     }
 }
 
-void draw_world(unsigned int sp, unsigned int vao) {
-    sp_gebruik_texture(sp, texture1, (vec2){3.0f, 1.0f});
+void teken_wereld(programma_t *programma) {
+    sp_gebruik_textuur(programma, textuur1);
     for (int z = 0; z < WORLD_Z; z++) {
         for (int x = WORLD_X - 1; x >= 0; x--) {
-            draw_model(sp, vao, (vec3s){.x = x, .y = -1.0f, .z = z}, 18, 24);
+            teken_model(programma, (vec3){x, -1.0f, z}, (ivec2){18, 24});
         }
     }
 
     for (int z = 0; z < WORLD_Z; z++) {
         for (int x = WORLD_X - 1; x >= 0; x--) {
-            if (wereld_entiteit_id(VEC3S(x, z))) {
-                draw_entity(sp, vao, wereld_entiteit_neem(VEC3S(x, z)));
+            if (wereld_entiteit_id((vec3){x, 0.0f, z})) {
+                teken_entiteit(programma, wereld_entiteit_neem((vec3){x, 0.0f, z}));
             }
         }
     }
@@ -179,22 +170,25 @@ int main() {
     glfwSetWindowAspectRatio(window, SCR_WIDTH, SCR_HEIGHT);
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD");
         return -1;
     }
 
-    uint32_t sp = sp_maak_programma("bron/schaduwprogramma/sp_hoekpunt.vs",
-                                    "bron/schaduwprogramma/sp_fragment.vs");
+    programma_t programma;
+    sp_maak_programma(&programma, "bron/schaduwprogramma/sp_hoekpunt.vs",
+                      "bron/schaduwprogramma/sp_fragment.vs");
 
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO, EBO;
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
-    glfwSetKeyCallback(window, key_callback);
     glBindVertexArray(0);
-    glGenVertexArrays(1, &VAO);
+    glGenVertexArrays(1, &programma.vao);
     glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
+    glBindVertexArray(programma.vao);
     float vertices[] = {
         // back face
         0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  //
@@ -240,42 +234,32 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    texture1 = sp_laad_texture("middelen/muur_map_1.png");
-    texture2 = sp_laad_texture("middelen/speler_1.png");
+    textuur1 = sp_laad_textuur("middelen/muur_map_1.png", (ivec2){3, 1});
+    textuur2 = sp_laad_textuur("middelen/speler_1.png", (ivec2){8, 2});
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    sp_gebruik(sp);
-
-    vec3s color = {.r = 1.0f, .g = 1.0f, .b = 1.0f};
-
-    mat4 projection;
+    sp_gebruik(&programma);
+    mat4 projectie;
     float pro_width = 12;
-    glm_ortho(0.0f, pro_width * SCR_ASPECT, 0.0f, pro_width, 0.1f, 100.0f, projection);
+    glm_ortho(0.0f, pro_width * SCR_ASPECT, 0.0f, pro_width, 0.1f, 100.0f, projectie);
+    sp_uniform_zet_int(&programma, "afbeelding", 0);
+    sp_uniform_zet_m4f(&programma, "projectie", projectie);
 
-    sp_uniform_zet_int(sp, "image", 0);
-    int projectionLoc = glGetUniformLocation(sp, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)&projection);
-
-    int colorLoc = glGetUniformLocation(sp, "spriteColor");
-    int viewLoc = glGetUniformLocation(sp, "view");
-    glUniform3fv(colorLoc, 1, (GLfloat *)&color);
+    vec3 color = {1.0f, 1.0f, 1.0f};
+    sp_uniform_zet_3f(&programma, "spriteColor", color);
 
     uint32_t muur_id = wereld_entiteit_maak_id();
     for (int z = 0; z < WORLD_Z; z++) {
         for (int x = WORLD_X - 1; x >= 0; x--) {
             if (world[z][x] == 1) {
-                wereld_entiteit_voegtoe((vec3s){.x = x, .y = 0.0f, .z = z}, muur_id,
-                                        texture1, 6, 24);
+                wereld_entiteit_voegtoe((vec3){x, 0.0f, z}, muur_id, textuur1,
+                                        (ivec2){6, 24});
             }
         }
     }
 
-    vec3s speler_positie = {.x = 5.0f, .y = 0.0f, .z = 5.0f};
+    vec3 speler_positie = {5.0f, 0.0f, 5.0f};
     uint32_t speler_id = wereld_entiteit_maak_id();
-    wereld_entiteit_voegtoe(speler_positie, texture2, speler_id, 0, 6);
-
-    double timeAnim = glfwGetTime();
+    wereld_entiteit_voegtoe(speler_positie, textuur2, speler_id, (ivec2){0, 6});
 
     float yaw = -45.0f;
     float pitch = -45.0f;
@@ -283,18 +267,19 @@ int main() {
     float cxup = cos(glm_rad(yaw));
     float czright = sin(glm_rad(90 + yaw));
     float cxright = cos(glm_rad(90 + yaw));
-    vec3 direction;
-    vec3s camera = {.x = 0.0f, .y = 3.0f, .z = 0.0f};
-    mat4 view;
+    vec3 camera = {0.0f, 4.0f, 0.0f};
+    mat4 zicht;
     vec3 up;
+    vec3 direction;
     direction[0] = cos(glm_rad(yaw)) * cos(glm_rad(pitch));
     direction[1] = sin(glm_rad(pitch));
     direction[2] = sin(glm_rad(yaw)) * cos(glm_rad(pitch));
     glm_vec3_normalize(direction);
+    glm_vec3_add(camera, direction, up);
+    glm_lookat(camera, up, (vec3){0.0f, 1.0f, 0.0f}, zicht);
+    sp_uniform_zet_m4f(&programma, "zicht", zicht);
 
-    glm_vec3_add((vec3){camera.x, camera.y, camera.z}, direction, up);
-    glm_lookat((vec3){camera.x, camera.y, camera.z}, up, (vec3){0.0f, 1.0f, 0.0f}, view);
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)&view);
+    double timeAnim = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -305,12 +290,12 @@ int main() {
         bool cam_moved = false;
         if (press_q && yaw > -85.0f) {
             yaw -= 1.0f;
-            camera.z += 0.2f;
+            camera[2] += 0.2f;
             cam_moved = true;
         }
         if (press_e && yaw < -05.0f) {
             yaw += 1.0f;
-            camera.z -= 0.2f;
+            camera[2] -= 0.2f;
             cam_moved = true;
         }
 
@@ -326,134 +311,153 @@ int main() {
         }
 
         if (press_w) {
-            camera.z += 0.2f * czup;
-            camera.x += 0.2f * cxup;
+            camera[2] += 0.2f * czup;
+            camera[0] += 0.2f * cxup;
             cam_moved = true;
         }
         if (press_a) {
-            camera.z -= 0.2f * czright;
-            camera.x -= 0.2f * cxright;
+            camera[2] -= 0.2f * czright;
+            camera[0] -= 0.2f * cxright;
             cam_moved = true;
         }
         if (press_s) {
-            camera.z -= 0.2f * czup;
-            camera.x -= 0.2f * cxup;
+            camera[2] -= 0.2f * czup;
+            camera[0] -= 0.2f * cxup;
             cam_moved = true;
         }
         if (press_d) {
-            camera.z += 0.2f * czright;
-            camera.x += 0.2f * cxright;
+            camera[2] += 0.2f * czright;
+            camera[0] += 0.2f * cxright;
             cam_moved = true;
         }
 
         if (cam_moved) {
-            glm_vec3_add((vec3){camera.x, camera.y, camera.z}, direction, up);
-            glm_lookat((vec3){camera.x, camera.y, camera.z}, up, (vec3){0.0f, 1.0f, 0.0f},
-                       view);
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)&view);
+            glm_vec3_add(camera, direction, up);
+            glm_lookat(camera, up, (vec3){0.0f, 1.0f, 0.0f}, zicht);
+            sp_uniform_zet_m4f(&programma, "zicht", zicht);
         }
 
         double newTime = glfwGetTime();
 
         const float move = 0.05f;
         bool moved = false;
-        vec3s speler_positie_oud = speler_positie;
+        vec3 speler_positie_oud = {speler_positie[0], 0.0f, speler_positie[2]};
         const float speler_kader = 0.3f;
 
-#define id_up_le        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x - speler_kader, speler_positie.z - speler_kader - move))
-#define id_up_ri        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x + speler_kader, speler_positie.z - speler_kader - move))
-#define id_do_le        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x - speler_kader, speler_positie.z + speler_kader + move))
-#define id_do_ri        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x + speler_kader, speler_positie.z + speler_kader + move))
-#define id_le_to        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x - speler_kader - move, speler_positie.z - speler_kader))
-#define id_le_bo        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x - speler_kader - move, speler_positie.z + speler_kader))
-#define id_ri_to        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x + speler_kader + move, speler_positie.z - speler_kader))
-#define id_ri_bo        \
-    wereld_entiteit_id( \
-        VEC3S(speler_positie.x + speler_kader + move, speler_positie.z + speler_kader))
+#define id_up_le                                                      \
+    wereld_entiteit_id((vec3){speler_positie[0] - speler_kader, 0.0f, \
+                              speler_positie[2] - speler_kader - move})
+#define id_up_ri                                                      \
+    wereld_entiteit_id((vec3){speler_positie[0] + speler_kader, 0.0f, \
+                              speler_positie[2] - speler_kader - move})
+#define id_do_le                                                      \
+    wereld_entiteit_id((vec3){speler_positie[0] - speler_kader, 0.0f, \
+                              speler_positie[2] + speler_kader + move})
+#define id_do_ri                                                      \
+    wereld_entiteit_id((vec3){speler_positie[0] + speler_kader, 0.0f, \
+                              speler_positie[2] + speler_kader + move})
+#define id_le_to                                                             \
+    wereld_entiteit_id((vec3){speler_positie[0] - speler_kader - move, 0.0f, \
+                              speler_positie[2] - speler_kader})
+#define id_le_bo                                                             \
+    wereld_entiteit_id((vec3){speler_positie[0] - speler_kader - move, 0.0f, \
+                              speler_positie[2] + speler_kader})
+#define id_ri_to                                                             \
+    wereld_entiteit_id((vec3){speler_positie[0] + speler_kader + move, 0.0f, \
+                              speler_positie[2] - speler_kader})
+#define id_ri_bo                                                             \
+    wereld_entiteit_id((vec3){speler_positie[0] + speler_kader + move, 0.0f, \
+                              speler_positie[2] + speler_kader})
 
         if (press_up && (id_up_le == 0 || id_up_le == speler_id) &&
             (id_up_ri == 0 || id_up_ri == speler_id)) {
-            speler_positie.z -= move;
+            speler_positie[2] -= move;
             moved = true;
-            flip[0] = 3;
+            animatie_frame[0] = 3;
         }
 
         if (press_down && (id_do_le == 0 || id_do_le == speler_id) &&
             (id_do_ri == 0 || id_do_ri == speler_id)) {
-            speler_positie.z += move;
+            speler_positie[2] += move;
             moved = true;
-            flip[0] = 0;
+            animatie_frame[0] = 0;
         }
 
         if (press_left && (id_le_to == 0 || id_le_to == speler_id) &&
             (id_le_bo == 0 || id_le_bo == speler_id)) {
-            speler_positie.x -= move;
+            speler_positie[0] -= move;
             moved = true;
-            flip[0] = 1;
+            animatie_frame[0] = 1;
         }
 
         if (press_right && (id_ri_to == 0 || id_ri_to == speler_id) &&
             (id_ri_bo == 0 || id_ri_bo == speler_id)) {
-            speler_positie.x += move;
+            speler_positie[0] += move;
             moved = true;
-            flip[0] = 2;
+            animatie_frame[0] = 2;
         }
 
         if (moved) {
-            if ((newTime - timeAnim) > 0.2f) {
-                timeAnim = newTime;
-                flip[1] = (flip[1] == 0.0f) ? 1.0f : 0.0f;
-            }
             wereld_entiteit_verwijder(speler_positie_oud);
-            wereld_entiteit_voegtoe(speler_positie, texture2, speler_id, 0, 6);
+            wereld_entiteit_voegtoe(speler_positie, textuur2, speler_id, (ivec2){0, 6});
         }
 
-        if (flip[1] == 2.0f && (newTime - timeAnim) > 0.2f) {
-            timeAnim = newTime;
-            flip[1] = 3.0f;
+        if ((newTime - timeAnim) > 0.2f) {
+            if (animatie_offset_x != 4 && moved) {
+                timeAnim = newTime;
+                animatie_frame[1] = (animatie_frame[1] == 0) ? 1 : 0;
+            } else if (animatie_offset_x == 4 && animatie_frame[1] == 0) {
+                timeAnim = newTime;
+                animatie_frame[1] = 1;
+            } else if (animatie_offset_x == 4 && animatie_frame[1] == 1) {
+                timeAnim = newTime;
+                animatie_offset_x = 0;
+                animatie_frame[1] = 0;
+            }
         }
 
-        if (flip[1] == 3.0f && (newTime - timeAnim) > 0.2f) {
+        if (destroy && animatie_offset_x != 4) {
             timeAnim = newTime;
-            flip[1] = 0.0f;
-        }
-
-        if (destroy) {
-            timeAnim = newTime;
-            flip[1] = 2.0f;
-            if (wereld_entiteit_id(VEC3S((int)(speler_positie.x + 0.5f),
-                                         (int)(speler_positie.z + 1.0f)))) {
-                wereld_entiteit_verwijder(VEC3S((int)(speler_positie.x + 0.5f),
-                                                (int)(speler_positie.z + 1.0f)));
+            animatie_offset_x = 4;
+            animatie_frame[1] = 0;
+            if (press_down &&
+                wereld_entiteit_id((vec3){(int)speler_positie[0] + 0.35f, 0.0f,
+                                          (int)(speler_positie[2] + 1.1f)})) {
+                wereld_entiteit_verwijder((vec3){(int)speler_positie[0] + 0.35f, 0.0f,
+                                                 (int)(speler_positie[2] + 1.1f)});
+            }
+            if (press_up &&
+                wereld_entiteit_id((vec3){(int)speler_positie[0] + 0.35f, 0.0f,
+                                          (int)(speler_positie[2] - 0.5f)})) {
+                wereld_entiteit_verwijder((vec3){(int)speler_positie[0] + 0.35f, 0.0f,
+                                                 (int)(speler_positie[2] - 0.5f)});
+            }
+            if (press_right &&
+                wereld_entiteit_id((vec3){(int)speler_positie[0] + 1.1f + 0.35f, 0.0f,
+                                          (int)(speler_positie[2])})) {
+                wereld_entiteit_verwijder((vec3){(int)speler_positie[0] + 1.1f + 0.35f,
+                                                 0.0f, (int)(speler_positie[2])});
+            }
+            if (press_left &&
+                wereld_entiteit_id((vec3){(int)speler_positie[0] - 0.5f + 0.35f, 0.0f,
+                                          (int)(speler_positie[2])})) {
+                wereld_entiteit_verwijder((vec3){(int)speler_positie[0] - 0.5f + 0.35f,
+                                                 0.0f, (int)(speler_positie[2])});
             }
             destroy = false;
         }
 
-        sp_gebruik(sp);
-        draw_world(sp, VAO);
+        sp_gebruik(&programma);
+        teken_wereld(&programma);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &programma.vao);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    sp_verwijder(sp);
+    sp_verwijder(&programma);
 
     glfwTerminate();
     return 0;

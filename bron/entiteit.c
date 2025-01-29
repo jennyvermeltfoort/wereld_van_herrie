@@ -14,25 +14,28 @@ uint32_t id_index = 1;
 
 uint32_t wereld_entiteit_maak_id(void) { return id_index++; }
 
-void wereld_entiteit_voegtoe(vec3s positie, unsigned char id, unsigned int texture,
-                             unsigned char start, unsigned char eind) {
+void wereld_entiteit_voegtoe(vec3 positie, unsigned char id, unsigned int texture,
+                             ivec2 hoeken) {
     entiteit_t *e =
-        &wereld_entiteiten[(int)(positie.z + MIDDEL_Z)][(int)(positie.x + MIDDEL_X)];
-    e->start = start;
-    e->eind = eind;
+        &wereld_entiteiten[(int)(positie[2] + MIDDEL_Z)][(int)(positie[0] + MIDDEL_X)];
+    e->hoeken[0] = hoeken[0];
+    e->hoeken[1] = hoeken[1];
     e->texture = texture;
-    e->positie = positie;
-    wereld_entiteiten_id[(int)(positie.z + MIDDEL_Z)][(int)(positie.x + MIDDEL_X)] = id;
+    e->positie[0] = positie[0];
+    e->positie[1] = positie[1];
+    e->positie[2] = positie[2];
+    wereld_entiteiten_id[(int)(positie[2] + MIDDEL_Z)][(int)(positie[0] + MIDDEL_X)] = id;
 }
 
-void wereld_entiteit_verwijder(vec3s positie) {
-    wereld_entiteiten_id[(int)(positie.z + MIDDEL_Z)][(int)(positie.x + MIDDEL_X)] = 0;
+void wereld_entiteit_verwijder(vec3 positie) {
+    wereld_entiteiten_id[(int)(positie[2] + MIDDEL_Z)][(int)(positie[0] + MIDDEL_X)] = 0;
 }
 
-uint32_t wereld_entiteit_id(vec3s positie) {
-    return wereld_entiteiten_id[(int)(positie.z + MIDDEL_Z)][(int)(positie.x + MIDDEL_X)];
+uint32_t wereld_entiteit_id(vec3 positie) {
+    return wereld_entiteiten_id[(int)(positie[2] + MIDDEL_Z)]
+                               [(int)(positie[0] + MIDDEL_X)];
 }
 
-entiteit_t *wereld_entiteit_neem(vec3s positie) {
-    return &wereld_entiteiten[(int)(positie.z + MIDDEL_Z)][(int)(positie.x + MIDDEL_X)];
+entiteit_t *wereld_entiteit_neem(vec3 positie) {
+    return &wereld_entiteiten[(int)(positie[2] + MIDDEL_Z)][(int)(positie[0] + MIDDEL_X)];
 }
