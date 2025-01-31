@@ -20,10 +20,10 @@ const float SCR_ASPECT = (float)SCR_WIDTH / (float)SCR_HEIGHT;
 
 int world[WORLD_Z][WORLD_X] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  //
-    {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},  //
-    {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},  //
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
-    {1, 1, 1, 0, 0, 0, 0, 1, 1, 1},  //
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},  //
     {1, 0, 0, 0, 0, 0, 0, 1, 0, 1},  //
@@ -43,6 +43,7 @@ int world[WORLD_Z][WORLD_X] = {
 
 unsigned int textuur1;
 unsigned int textuur2;
+unsigned int textuur3;
 
 bool press_w = false;
 bool press_s = false;
@@ -103,7 +104,7 @@ void teken_model_sprite(programma_t *programma, vec3 positie, ivec2 hoeken) {
     mat4 model;
     glm_mat4_identity(model);
     glm_translate(model, positie);
-    glm_rotate(model, glm_rad(-45.0f), (vec3){0.0f, 1.0f, 0.0f});
+    glm_rotate(model, glm_rad(-0.0f), (vec3){0.0f, 1.0f, 0.0f});
     sp_uniform_zet_m4f(programma, "model", model);
     sp_uniform_zet_2i(programma, "vak",
                       (ivec2){animatie_frame[0] + animatie_offset_x, animatie_frame[1]});
@@ -198,26 +199,26 @@ int main() {
         1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  //
         0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  //
         // right face
-        0.0f, 1.0f, 1.0f, 0.0f, 1.0f,  //
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  //
-        1.0f, 0.0f, 1.0f, 1.0f, 0.0f,  //
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  //
+        0.0f, 1.0f, 1.0f, 2.0f, 1.0f,  //
+        1.0f, 1.0f, 1.0f, 3.0f, 1.0f,  //
+        0.0f, 0.0f, 1.0f, 2.0f, 0.0f,  //
+        1.0f, 0.0f, 1.0f, 3.0f, 0.0f,  //
+        1.0f, 1.0f, 1.0f, 3.0f, 1.0f,  //
+        0.0f, 0.0f, 1.0f, 2.0f, 0.0f,  //
         // left face
-        0.0f, 0.0f, 0.0f, 2.0f, 0.0f,  //
-        0.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,  //
-        0.0f, 1.0f, 1.0f, 3.0f, 1.0f,  //
-        0.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 0.0f, 1.0f, 3.0f, 0.0f,  //
-        // top face
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  //
         0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  //
-        1.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,  //
-        1.0f, 1.0f, 1.0f, 2.0f, 0.0f,  //
-        1.0f, 1.0f, 0.0f, 2.0f, 1.0f,  //
-        0.0f, 1.0f, 1.0f, 1.0f, 0.0f,  //
+        0.0f, 0.0f, 1.0f, 2.0f, 0.0f,  //
+        0.0f, 1.0f, 1.0f, 2.0f, 1.0f,  //
+        0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  //
+        0.0f, 0.0f, 1.0f, 2.0f, 0.0f,  //
+        // top face
+        0.0f, 1.0f, 0.0f, 3.0f, 1.0f,  //
+        1.0f, 1.0f, 0.0f, 4.0f, 1.0f,  //
+        0.0f, 1.0f, 1.0f, 3.0f, 0.0f,  //
+        1.0f, 1.0f, 1.0f, 4.0f, 0.0f,  //
+        1.0f, 1.0f, 0.0f, 4.0f, 1.0f,  //
+        0.0f, 1.0f, 1.0f, 3.0f, 0.0f,  //
     };
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -234,8 +235,9 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    textuur1 = sp_laad_textuur("middelen/muur_map_1.png", (ivec2){3, 1});
+    textuur1 = sp_laad_textuur("middelen/muur_map_1.png", (ivec2){4, 1});
     textuur2 = sp_laad_textuur("middelen/speler_1.png", (ivec2){8, 2});
+    textuur3 = sp_laad_textuur("middelen/muur_map_2.png", (ivec2){4, 1});
 
     sp_gebruik(&programma);
     mat4 projectie;
@@ -251,8 +253,8 @@ int main() {
     for (int z = 0; z < WORLD_Z; z++) {
         for (int x = WORLD_X - 1; x >= 0; x--) {
             if (world[z][x] == 1) {
-                wereld_entiteit_voegtoe((vec3){x, 0.0f, z}, muur_id, textuur1,
-                                        (ivec2){6, 24});
+                // wereld_entiteit_voegtoe((vec3){x, 0.0f, z}, muur_id, textuur1,
+                //                         (ivec2){6, 24});
             }
         }
     }
@@ -261,7 +263,7 @@ int main() {
     uint32_t speler_id = wereld_entiteit_maak_id();
     wereld_entiteit_voegtoe(speler_positie, textuur2, speler_id, (ivec2){0, 6});
 
-    float yaw = -45.0f;
+    float yaw = -90.0f;
     float pitch = -45.0f;
     float czup = sin(glm_rad(yaw));
     float cxup = cos(glm_rad(yaw));
@@ -449,6 +451,8 @@ int main() {
 
         sp_gebruik(&programma);
         teken_wereld(&programma);
+        sp_gebruik_textuur(&programma, textuur3);
+        teken_model(&programma, (vec3){8.0f, 0.0f, 1.0f}, (ivec2){0, 24});
 
         glfwSwapBuffers(window);
         glfwPollEvents();
